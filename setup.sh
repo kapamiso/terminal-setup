@@ -57,17 +57,17 @@ install_p10k() {
 
 # Preserve machine-specific config from existing .zshrc
 preserve_local_config() {
-  if [[ -f "$HOME/.zshrc" && ! -L "$HOME/.zshrc" && ! -f "$HOME/.zshrc.local" ]]; then
-    echo "==> Extracting machine-specific config to ~/.zshrc.local..."
-    # Save PATH exports and other custom lines not in our managed .zshrc
-    grep -vE '^\s*#|^\s*$|oh-my-zsh|ZSH_THEME|^plugins=|p10k|powerlevel' "$HOME/.zshrc" \
-      | grep -vE 'zsh-autosuggestions|\.bun|homebrew|brew' \
-      > "$HOME/.zshrc.local" 2>/dev/null || true
-    if [[ -s "$HOME/.zshrc.local" ]]; then
-      echo "    Saved to ~/.zshrc.local"
-    else
-      rm -f "$HOME/.zshrc.local"
-    fi
+  if [[ ! -f "$HOME/.zshrc.local" ]]; then
+    echo "==> Creating ~/.zshrc.local for machine-specific config..."
+    cat > "$HOME/.zshrc.local" <<'LOCALEOF'
+# Machine-specific config (not tracked by git)
+# Add PATH entries, tool configs, etc. that are unique to this machine.
+# Example:
+#   export PATH="/some/tool/bin:$PATH"
+LOCALEOF
+    echo "    Created ~/.zshrc.local — add machine-specific config there."
+  else
+    echo "==> ~/.zshrc.local already exists, skipping."
   fi
 }
 
