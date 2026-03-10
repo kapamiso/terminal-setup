@@ -6,6 +6,14 @@ OS="$(uname -s)"
 
 echo "==> Detected OS: $OS"
 
+# Request sudo password upfront on Linux (needed for package install and chsh)
+if [[ "$OS" == "Linux" ]]; then
+  echo "==> Some steps require sudo. You'll be prompted for your password."
+  sudo -v
+  # Keep sudo session alive in the background
+  while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+fi
+
 # Install dependencies
 install_deps() {
   case "$OS" in

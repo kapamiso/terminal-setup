@@ -18,6 +18,17 @@ chmod +x setup.sh
 - **tmux** config
 - **git** config
 
+## Update
+
+If you've already run the setup script, pull the latest changes:
+
+```bash
+cd ~/terminal-setup
+git pull
+```
+
+Since the dotfiles are symlinked, changes take effect on your next terminal session.
+
 ## Windows
 
 Use WSL (Windows Subsystem for Linux), then run the setup script inside WSL.
