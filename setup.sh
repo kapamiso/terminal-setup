@@ -58,7 +58,7 @@ install_p10k() {
 # Symlink dotfiles
 link_dotfiles() {
   echo "==> Linking dotfiles..."
-  local files=(".zshrc" ".p10k.zsh" ".tmux.conf" ".gitconfig")
+  local files=(".zshrc" ".p10k.zsh" ".tmux.conf")
   for file in "${files[@]}"; do
     if [[ -f "$HOME/$file" && ! -L "$HOME/$file" ]]; then
       echo "    Backing up existing $file to $file.bak"
