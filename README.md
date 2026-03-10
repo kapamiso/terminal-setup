@@ -1,11 +1,11 @@
-# Dotfiles
+# Terminal Setup
 
 Personal terminal setup for macOS, Linux, and Windows (WSL).
 
 ## Quick Setup
 
 ```bash
-git clone git@github.com:kapamiso/terminal-setup.git ~/terminal-setup
+git clone https://github.com/kapamiso/terminal-setup.git ~/terminal-setup
 cd ~/terminal-setup
 chmod +x setup.sh
 ./setup.sh
