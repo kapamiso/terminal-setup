@@ -55,20 +55,96 @@ install_p10k() {
   fi
 }
 
-# Preserve machine-specific config from existing .zshrc
-preserve_local_config() {
-  if [[ ! -f "$HOME/.zshrc.local" ]]; then
-    echo "==> Creating ~/.zshrc.local for machine-specific config..."
-    cat > "$HOME/.zshrc.local" <<'LOCALEOF'
-# Machine-specific config (not tracked by git)
-# Add PATH entries, tool configs, etc. that are unique to this machine.
-# Example:
-#   export PATH="/some/tool/bin:$PATH"
-LOCALEOF
-    echo "    Created ~/.zshrc.local — add machine-specific config there."
-  else
-    echo "==> ~/.zshrc.local already exists, skipping."
+# Helper: add a line to .zshrc.local if not already present
+add_local() {
+  local line="$1"
+  local label="$2"
+  if ! grep -qF "$line" "$HOME/.zshrc.local" 2>/dev/null; then
+    echo "" >> "$HOME/.zshrc.local"
+    echo "# $label" >> "$HOME/.zshrc.local"
+    echo "$line" >> "$HOME/.zshrc.local"
+    echo "    Added $label"
   fi
+}
+
+# Detect installed tools and add their config to .zshrc.local
+detect_tools() {
+  echo "==> Detecting installed tools..."
+
+  # Create .zshrc.local if it doesn't exist
+  if [[ ! -f "$HOME/.zshrc.local" ]]; then
+    echo "# Machine-specific config (auto-detected by setup.sh)" > "$HOME/.zshrc.local"
+  fi
+
+  # Claude Code
+  if [[ -d "$HOME/.claude" ]]; then
+    add_local 'export PATH="$HOME/.claude/bin:$PATH"' "Claude Code"
+  fi
+
+  # NVM
+  if [[ -d "$HOME/.nvm" ]]; then
+    add_local 'export NVM_DIR="$HOME/.nvm"' "NVM"
+    add_local '[ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"' "NVM loader"
+    add_local '[ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"' "NVM completions"
+  fi
+
+  # Cargo / Rust
+  if [[ -d "$HOME/.cargo" ]]; then
+    add_local 'source "$HOME/.cargo/env"' "Cargo/Rust"
+  fi
+
+  # Go
+  if [[ -d "/usr/local/go" ]]; then
+    add_local 'export PATH="/usr/local/go/bin:$PATH"' "Go"
+  fi
+  if [[ -d "$HOME/go" ]]; then
+    add_local 'export PATH="$HOME/go/bin:$PATH"' "Go workspace"
+  fi
+
+  # pyenv
+  if [[ -d "$HOME/.pyenv" ]]; then
+    add_local 'export PYENV_ROOT="$HOME/.pyenv"' "pyenv"
+    add_local 'export PATH="$PYENV_ROOT/bin:$PATH"' "pyenv bin"
+    add_local 'eval "$(pyenv init -)"' "pyenv init"
+  fi
+
+  # rbenv
+  if [[ -d "$HOME/.rbenv" ]]; then
+    add_local 'export PATH="$HOME/.rbenv/bin:$PATH"' "rbenv"
+    add_local 'eval "$(rbenv init -)"' "rbenv init"
+  fi
+
+  # Deno
+  if [[ -d "$HOME/.deno" ]]; then
+    add_local 'export DENO_INSTALL="$HOME/.deno"' "Deno"
+    add_local 'export PATH="$DENO_INSTALL/bin:$PATH"' "Deno bin"
+  fi
+
+  # pnpm
+  if [[ -d "$HOME/.local/share/pnpm" ]]; then
+    add_local 'export PNPM_HOME="$HOME/.local/share/pnpm"' "pnpm"
+    add_local 'export PATH="$PNPM_HOME:$PATH"' "pnpm bin"
+  fi
+
+  # Snap (Linux)
+  if [[ -d "/snap/bin" ]]; then
+    add_local 'export PATH="/snap/bin:$PATH"' "Snap"
+  fi
+
+  # Linuxbrew
+  if [[ -d "/home/linuxbrew/.linuxbrew" ]]; then
+    add_local 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' "Linuxbrew"
+  fi
+
+  # Conda / Miniconda / Anaconda
+  for conda_dir in "$HOME/miniconda3" "$HOME/anaconda3" "/opt/conda"; do
+    if [[ -d "$conda_dir" ]]; then
+      add_local "source \"$conda_dir/etc/profile.d/conda.sh\"" "Conda ($conda_dir)"
+      break
+    fi
+  done
+
+  echo "    Done scanning."
 }
 
 # Symlink dotfiles
@@ -141,7 +217,7 @@ echo ""
 install_deps
 install_omz
 install_p10k
-preserve_local_config
+detect_tools
 link_dotfiles
 set_default_shell
 install_font
