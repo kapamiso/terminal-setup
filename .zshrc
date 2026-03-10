@@ -53,5 +53,8 @@ if [[ -d "$HOME/.bun" ]]; then
   export PATH="$BUN_INSTALL/bin:$PATH"
 fi
 
+# Machine-specific config (not tracked by git)
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

@@ -55,6 +55,22 @@ install_p10k() {
   fi
 }
 
+# Preserve machine-specific config from existing .zshrc
+preserve_local_config() {
+  if [[ -f "$HOME/.zshrc" && ! -L "$HOME/.zshrc" && ! -f "$HOME/.zshrc.local" ]]; then
+    echo "==> Extracting machine-specific config to ~/.zshrc.local..."
+    # Save PATH exports and other custom lines not in our managed .zshrc
+    grep -vE '^\s*#|^\s*$|oh-my-zsh|ZSH_THEME|^plugins=|p10k|powerlevel' "$HOME/.zshrc" \
+      | grep -vE 'zsh-autosuggestions|\.bun|homebrew|brew' \
+      > "$HOME/.zshrc.local" 2>/dev/null || true
+    if [[ -s "$HOME/.zshrc.local" ]]; then
+      echo "    Saved to ~/.zshrc.local"
+    else
+      rm -f "$HOME/.zshrc.local"
+    fi
+  fi
+}
+
 # Symlink dotfiles
 link_dotfiles() {
   echo "==> Linking dotfiles..."
@@ -125,6 +141,7 @@ echo ""
 install_deps
 install_omz
 install_p10k
+preserve_local_config
 link_dotfiles
 set_default_shell
 install_font
