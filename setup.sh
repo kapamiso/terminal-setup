@@ -79,10 +79,43 @@ set_default_shell() {
 
 # Install MesloLGS NF font (needed for p10k icons)
 install_font() {
-  echo "==> Install MesloLGS NF font for Powerlevel10k icons:"
-  echo "    https://github.com/romkatv/powerlevel10k#meslo-nerd-font-patched-for-powerlevel10k"
-  echo "    Download and install all 4 variants (Regular, Bold, Italic, Bold Italic)."
-  echo "    Then set your terminal font to 'MesloLGS NF'."
+  echo "==> Installing MesloLGS NF font..."
+
+  local FONT_DIR
+  case "$OS" in
+    Darwin)
+      FONT_DIR="$HOME/Library/Fonts"
+      ;;
+    Linux)
+      FONT_DIR="$HOME/.local/share/fonts"
+      mkdir -p "$FONT_DIR"
+      ;;
+  esac
+
+  local BASE_URL="https://github.com/romkatv/powerlevel10k-media/raw/master"
+  local FONTS=(
+    "MesloLGS%20NF%20Regular.ttf"
+    "MesloLGS%20NF%20Bold.ttf"
+    "MesloLGS%20NF%20Italic.ttf"
+    "MesloLGS%20NF%20Bold%20Italic.ttf"
+  )
+
+  for font in "${FONTS[@]}"; do
+    local decoded="${font//%20/ }"
+    if [[ ! -f "$FONT_DIR/$decoded" ]]; then
+      curl -sL "$BASE_URL/$font" -o "$FONT_DIR/$decoded"
+      echo "    Installed $decoded"
+    else
+      echo "    $decoded already installed"
+    fi
+  done
+
+  # Refresh font cache on Linux
+  if [[ "$OS" == "Linux" ]] && command -v fc-cache &>/dev/null; then
+    fc-cache -f "$FONT_DIR"
+  fi
+
+  echo "    >> Set your terminal font to 'MesloLGS NF' in your terminal settings."
 }
 
 echo ""
